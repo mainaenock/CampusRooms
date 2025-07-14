@@ -6,6 +6,15 @@ import Dashboard from './pages/Dashboard.jsx';
 import ProtectedRoute from './pages/components/protectedRoutes.jsx';
 import ForgotPassword from './pages/forgotPassword.jsx';
 import ResetPassword from './pages/resetPassword.jsx';
+import LandingPage from './pages/LandingPage.jsx';
+
+import Listings from './pages/Listings.jsx';
+import MyListings from './pages/landlord/MyListings.jsx';
+import NewListing from './pages/landlord/NewListing.jsx';
+import AdminDashboard from './pages/admin/AdminDashboard.jsx';
+import AdminProtectedRoute from './pages/admin/AdminProtectedRoute.jsx';
+
+
 
 
 const App = () => {
@@ -14,6 +23,8 @@ const App = () => {
    <BrowserRouter>
     <Toaster position="top-center" />
     <Routes>
+      <Route path='/' element={<LandingPage />} />
+      <Route path='/listings' element={<Listings />} />
       <Route path='/reg' element={<Registration />} />
       <Route path='/login' element={<Login />} />
       <Route
@@ -26,7 +37,9 @@ const App = () => {
       />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
-
+      <Route path='/landlord/listings' element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
+      <Route path='/landlord/new-listing' element={<ProtectedRoute><NewListing /></ProtectedRoute>} />
+      <Route path='/admin/dashboard' element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
     </Routes>
    </BrowserRouter>
   )

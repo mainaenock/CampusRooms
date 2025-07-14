@@ -26,9 +26,25 @@ const LoginContainer = () => {
       const res = await axios.post('http://localhost:3000/cr/reg/login', { email, password })
       localStorage.setItem('user', JSON.stringify(res.data.user));
       localStorage.setItem('token', res.data.token);
-      
+
+      // Parse JWT to check role
+      function parseJwt(token) {
+        try {
+          return JSON.parse(atob(token.split('.')[1]));
+        } catch (e) {
+          return null;
+        }
+      }
+      const payload = parseJwt(res.data.token);
+
       toast.success('Login successful!', { id: toastId })
-      setTimeout(() => navigate('/dashboard'), 2000) // Change route after login
+      setTimeout(() => {
+        if (payload && payload.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/');
+        }
+      }, 2000);
     } catch (err) {
       const msg = err.response?.data?.message || 'Login failed'
       toast.error(msg, { id: toastId })
