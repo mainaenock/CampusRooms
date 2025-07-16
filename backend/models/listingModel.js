@@ -14,7 +14,8 @@ const listingSchema = new mongoose.Schema({
   university: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    index: true // Added index for fast university search
   },
   distance: {
     type: Number, // in meters
@@ -22,7 +23,8 @@ const listingSchema = new mongoose.Schema({
   },
   rent: {
     type: Number,
-    required: true
+    required: true,
+    index: true // Added index for fast rent queries
   },
   depositRequired: {
     type: Boolean,
@@ -49,13 +51,17 @@ const listingSchema = new mongoose.Schema({
   landlord: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
+    index: true // Added index for fast landlord queries
   },
   paid: {
     type: Boolean,
     default: false
   }
 }, { timestamps: true });
+
+// Compound index for university and rent
+listingSchema.index({ university: 1, rent: 1 });
 
 const Listing = mongoose.model('Listing', listingSchema);
 export default Listing;

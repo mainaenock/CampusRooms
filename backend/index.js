@@ -9,6 +9,7 @@ import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import setupChat from './chatSocket.js';
 import chatRoutes from './routes/chatRoutes.js';
+import { authLimiter, generalApiLimiter } from './middlewares/rateLimiter.js';
 
 dotenv.config();
 
@@ -21,6 +22,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+app.use(generalApiLimiter); // Apply general rate limiter globally
 
 const PORT = process.env.PORT || 3000;
 
