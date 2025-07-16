@@ -1,10 +1,13 @@
 
 import express from 'express';
-import { getAdminStats, getRecentListings, getRecentUsers } from '../controllers/adminController.js';
+import { getAdminStats, getRecentListings, getRecentUsers, adminFeatureListing } from '../controllers/adminController.js';
+const router = express.Router();
+
+// Admin: Feature any listing
+router.post('/feature-listing/:id', protect, isAdmin, adminFeatureListing);
 import { protect } from '../middlewares/auth.js';
 import { isAdmin } from '../middlewares/isAdmin.js';
 
-const router = express.Router();
 
 
 // All routes are protected and admin-only

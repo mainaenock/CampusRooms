@@ -38,6 +38,14 @@ const listingSchema = new mongoose.Schema({
   images: [{
     type: String // URLs or file paths
   }],
+  phoneNumber: {
+    type: String,
+    required: true
+  },
+  occupied: {
+    type: Boolean,
+    default: false
+  },
   landlord: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

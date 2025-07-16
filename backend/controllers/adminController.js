@@ -1,3 +1,16 @@
+// Admin: Feature any listing
+export async function adminFeatureListing(req, res) {
+  try {
+    const { id } = req.params;
+    const listing = await Listing.findById(id);
+    if (!listing) return res.status(404).json({ message: 'Listing not found' });
+    listing.isFeatured = true;
+    await listing.save();
+    res.json({ message: 'Listing is now featured by admin.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Admin failed to feature listing', error });
+  }
+}
 import User from '../models/registrationModel.js';
 import Listing from '../models/listingModel.js';
 
