@@ -1,12 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const ListingCard = ({ listing }) => {
+const ListingCard = ({ listing, showEdit }) => {
+  const navigate = useNavigate();
   return (
-    <div className="bg-white rounded-lg shadow p-4 flex flex-col gap-2 border hover:shadow-lg transition">
+    <div className="bg-white rounded-lg shadow p-4 flex flex-col gap-2 border hover:shadow-lg transition h-full min-h-[420px] max-h-[480px]">
       {listing.images && listing.images.length > 0 && (
         <div className="flex gap-2 overflow-x-auto mb-2">
           {listing.images.map((url, idx) => {
-            const fullUrl = url.startsWith('http') ? url : `http://localhost:3000${url}`;
+                  const fullUrl = url.startsWith('http') ? url : `http://localhost:3000${url}`;
             return (
               <img key={idx} src={fullUrl} alt="Apartment" className="h-28 w-40 object-cover rounded border" />
             );
@@ -32,6 +34,14 @@ const ListingCard = ({ listing }) => {
         ))}
       </div>
       <div className="text-xs text-gray-400 mt-2">Listed by: {listing.landlord?.firstName} {listing.landlord?.lastName}</div>
+      {showEdit && (
+        <button
+          className="mt-2 px-4 py-1 rounded bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition self-end"
+          onClick={() => navigate(`/landlord/edit-listing/${listing._id}`)}
+        >
+          Edit
+        </button>
+      )}
     </div>
   );
 };

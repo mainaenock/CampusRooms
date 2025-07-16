@@ -1,1 +1,22 @@
+html {
+  scroll-behavior: smooth;
+}
+/* Custom Animations & Gradients for CampusRooms */
+.animate-fade-in { opacity: 0; animation: fadeIn 1s forwards; }
+.animate-fade-in.delay-100 { animation-delay: .1s; }
+.animate-fade-in.delay-200 { animation-delay: .2s; }
+.animate-fade-in.delay-300 { animation-delay: .3s; }
+.animate-fade-in.delay-400 { animation-delay: .4s; }
+.animate-fade-in.delay-500 { animation-delay: .5s; }
+.animate-fade-in.delay-700 { animation-delay: .7s; }
+@keyframes fadeIn { to { opacity: 1; } }
+.animate-gradient-move {
+  background-size: 200% 200%;
+  animation: gradientMove 4s ease-in-out infinite;
+}
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 @import "tailwindcss";

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import ListingCard from '../components/ListingCard';
+import Header from './components/header';
 
 const universities = [
   'University of Nairobi',
@@ -56,6 +57,8 @@ const Listings = () => {
   };
 
   return (
+    <>
+      <Header />
     <div className="min-h-screen bg-blue-50 py-8 px-4">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl font-bold text-blue-800 mb-6">Find Student Apartments</h1>
@@ -120,6 +123,7 @@ const Listings = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 
