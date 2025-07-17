@@ -40,9 +40,8 @@ const NewListing = () => {
     setInstitutionSearchLoading(true);
     setInstitutionSearchError(null);
     const controller = new AbortController();
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(form.university)}`, {
-      signal: controller.signal,
-      headers: { 'Accept-Language': 'en' }
+    fetch(`/api/settings/geocode?query=${encodeURIComponent(form.university)}`, {
+      signal: controller.signal
     })
       .then(res => res.json())
       .then(data => {
@@ -102,6 +101,20 @@ const NewListing = () => {
   const [loading, setLoading] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState(null); // Store form data for post-payment submission
+  const [requirePayment, setRequirePayment] = useState(true);
+  React.useEffect(() => {
+    // Fetch payment requirement status
+    const fetchPaymentRequirement = async () => {
+      try {
+        const res = await axios.get('http://localhost:3000/api/settings/payment-requirement');
+        setRequirePayment(res.data.requirePaymentForListing);
+      } catch {
+        setRequirePayment(true); // Default to true if error
+      }
+    };
+    fetchPaymentRequirement();
+  }, []);
 
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
@@ -128,22 +141,55 @@ const NewListing = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!paymentSuccess) {
+    if (requirePayment) {
+      setPendingFormData({ ...form, images });
       setPaymentModalOpen(true);
-      return;
+    } else {
+      // Directly create listing if payment is not required
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const formData = new FormData();
+        Object.entries(form).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            value.forEach(v => formData.append(key, v));
+          } else {
+            formData.append(key, value);
+          }
+        });
+        images.forEach(img => formData.append('images', img));
+        await axios.post('http://localhost:3000/api/listings', formData, {
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+        });
+        toast.success('Listing created and published!');
+        setForm({ name: '', university: '', distance: '', rent: '', depositRequired: false, amenities: [], roomType: '', phoneNumber: '' });
+        setImages([]);
+        setImagePreviews([]);
+        setTimeout(() => navigate('/landlord/listings'), 1000);
+      } catch (err) {
+        toast.error(err.response?.data?.message || 'Failed to create listing');
+      } finally {
+        setLoading(false);
+      }
     }
+  };
+
+  // Called after payment is confirmed
+  const handlePaymentSuccess = async () => {
+    setPaymentModalOpen(false);
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       const formData = new FormData();
-      Object.entries(form).forEach(([key, value]) => {
+      Object.entries(pendingFormData).forEach(([key, value]) => {
+        if (key === 'images') return; // We'll add images separately
         if (Array.isArray(value)) {
           value.forEach(v => formData.append(key, v));
         } else {
           formData.append(key, value);
         }
       });
-      images.forEach(img => formData.append('images', img));
+      pendingFormData.images.forEach(img => formData.append('images', img));
       await axios.post('http://localhost:3000/api/listings', formData, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
       });
@@ -156,6 +202,7 @@ const NewListing = () => {
       toast.error(err.response?.data?.message || 'Failed to create listing');
     } finally {
       setLoading(false);
+      setPendingFormData(null);
     }
   };
 
@@ -293,18 +340,14 @@ const NewListing = () => {
           </div>
           </div>
           <button type="submit" disabled={loading} className="w-full py-2 px-4 rounded bg-blue-600 text-white font-bold hover:bg-blue-700 transition">
-            {loading ? 'Submitting...' : paymentSuccess ? 'Submit Listing' : 'Pay Ksh 100 to Submit'}
+            {loading ? 'Submitting...' : requirePayment ? 'Pay Ksh 100 to Submit' : 'Submit Listing'}
           </button>
         </form>
         {/* Move modal outside the form to avoid nested <form> error */}
         <MpesaListingPaymentModal
           open={paymentModalOpen}
           onClose={() => setPaymentModalOpen(false)}
-          onSuccess={() => {
-            setPaymentSuccess(true);
-            setPaymentModalOpen(false);
-            toast.success('Payment successful! You can now submit your listing.');
-          }}
+          onSuccess={handlePaymentSuccess}
         />
       </main>
     </div>

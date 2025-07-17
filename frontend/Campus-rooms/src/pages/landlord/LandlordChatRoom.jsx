@@ -17,36 +17,49 @@ const LandlordChatRoom = ({ landlordId }) => {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
 
+  // Get the actual landlord ID from localStorage if not provided
+  const actualLandlordId = landlordId || JSON.parse(localStorage.getItem('user'))?.id || JSON.parse(localStorage.getItem('user'))?._id;
+  const token = localStorage.getItem('token');
+
   useEffect(() => {
+    if (!actualLandlordId || !token) {
+      return;
+    }
+
     setLoadingConvs(true);
     async function fetchConversations() {
       try {
         const res = await axios.get('http://localhost:3000/api/chat/user-conversations', {
-          params: { userId: landlordId }
+          headers: { Authorization: `Bearer ${token}` }
         });
         setConversations(res.data);
       } catch (err) {
+        console.error('Error fetching conversations:', err.response?.data || err.message);
         setConversations([]);
       }
       setLoadingConvs(false);
     }
     fetchConversations();
-  }, [landlordId]);
+  }, [actualLandlordId, token]);
 
   useEffect(() => {
-    if (!activeStudent) return;
+    if (!activeStudent || !actualLandlordId || !token) {
+      return;
+    }
+    
     setLoadingMsgs(true);
     async function fetchMessages() {
       try {
         const res = await axios.get('http://localhost:3000/api/chat/history', {
+          headers: { Authorization: `Bearer ${token}` },
           params: {
             listingId: activeStudent.listingId,
-            userId: landlordId,
             otherId: activeStudent.otherUser
           }
         });
         setMessages(res.data || []);
       } catch (err) {
+        console.error('Error fetching messages:', err.response?.data || err.message);
         setMessages([]);
       }
       setLoadingMsgs(false);
@@ -58,13 +71,13 @@ const LandlordChatRoom = ({ landlordId }) => {
       s = io(SOCKET_URL, { transports: ['websocket'] });
       setSocket(s);
     }
-    s.emit('joinRoom', { listingId: activeStudent.listingId, userId: landlordId });
+    s.emit('joinRoom', { listingId: activeStudent.listingId, userId: actualLandlordId });
     s.off('chatMessage');
     s.on('chatMessage', (msg) => {
       // Show messages for this chat (either direction)
       if (
-        (msg.sender === landlordId && msg.receiver === activeStudent.otherUser) ||
-        (msg.sender === activeStudent.otherUser && msg.receiver === landlordId)
+        (msg.sender === actualLandlordId && msg.receiver === activeStudent.otherUser) ||
+        (msg.sender === activeStudent.otherUser && msg.receiver === actualLandlordId)
       ) {
         setMessages(prev => [...prev, msg]);
       }
@@ -72,7 +85,7 @@ const LandlordChatRoom = ({ landlordId }) => {
     return () => {
       s.off('chatMessage');
     };
-  }, [activeStudent, landlordId]);
+  }, [activeStudent, actualLandlordId, token]);
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -83,7 +96,7 @@ const LandlordChatRoom = ({ landlordId }) => {
     setSending(true);
     const msg = {
       listingId: activeStudent.listingId,
-      sender: landlordId,
+      sender: actualLandlordId,
       receiver: activeStudent.otherUser,
       message: input.trim(),
     };
@@ -136,9 +149,9 @@ const LandlordChatRoom = ({ landlordId }) => {
                   <div className="text-center text-gray-400 mt-8">No messages yet.</div>
                 ) : (
                   messages.map((msg, idx) => (
-                    <div key={idx} className={`flex ${msg.sender === landlordId ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`px-3 py-2 rounded-lg max-w-xs ${msg.sender === landlordId ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                        <div className="text-xs font-semibold mb-1">{msg.sender === landlordId ? 'You' : activeStudent.otherUserName}</div>
+                    <div key={idx} className={`flex ${msg.sender === actualLandlordId ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`px-3 py-2 rounded-lg max-w-xs ${msg.sender === actualLandlordId ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>
+                        <div className="text-xs font-semibold mb-1">{msg.sender === actualLandlordId ? 'You' : activeStudent.otherUserName}</div>
                         <div>{msg.message}</div>
                         <div className="text-[10px] text-right text-gray-400 mt-1">{msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString() : ''}</div>
                       </div>

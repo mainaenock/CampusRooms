@@ -21,9 +21,9 @@ const ChatRoom = ({ listingId, userId, receiverId, userName, receiverName, onClo
       setLoading(true);
       try {
         const res = await axios.get('http://localhost:3000/api/chat/history', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
           params: {
             listingId,
-            userId,
             otherId: receiverId
           }
         });

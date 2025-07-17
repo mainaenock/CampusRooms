@@ -28,11 +28,11 @@ const LandingHeader = () => {
     <header className="w-full bg-white shadow-md py-3 sm:py-4 px-2 sm:px-4 md:px-8 flex items-center justify-between fixed top-0 left-0 z-50" style={{right:0}}>
       <div className="flex items-center space-x-1 sm:space-x-2">
         <h2>
-          <Link to="/" className="flex items-center hover:opacity-80">
-            <span className='font-bold text-lg sm:text-xl md:text-2xl lg:text-[25px]'>Campus</span>
-            <span className='font-bold text-lg sm:text-xl md:text-2xl lg:text-[25px] text-red-900'>Rooms</span>
-            <span className='font-bold text-lg sm:text-xl md:text-2xl lg:text-[25px] text-green-800'>Ke</span>
-          </Link>
+                      <Link to="/" className="flex items-center hover:opacity-80">
+              <span className='font-bold text-lg sm:text-xl md:text-2xl lg:text-[25px] text-gray-800'>Campus</span>
+              <span className='font-bold text-lg sm:text-xl md:text-2xl lg:text-[25px] text-red-900'>Rooms</span>
+              <span className='font-bold text-lg sm:text-xl md:text-2xl lg:text-[25px] text-green-800'>Ke</span>
+            </Link>
           <hr className="hidden sm:block" />
         </h2>
       </div>

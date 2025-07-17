@@ -5,7 +5,7 @@ const ListingCardLanding = ({ listing }) => {
   const navigate = useNavigate();
   return (
     <div
-      className="min-w-[260px] max-w-xs bg-white rounded-xl shadow hover:shadow-lg transition flex-shrink-0 cursor-pointer"
+      className="w-full bg-white rounded-xl shadow hover:shadow-lg transition cursor-pointer"
       onClick={() => navigate('/listing-details', { state: { listing } })}
     >
       <div className="relative">

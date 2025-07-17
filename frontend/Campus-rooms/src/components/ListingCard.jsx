@@ -1,18 +1,23 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import noImage from '../assets/No_Image_Available.jpg';
 
 const ListingCard = ({ listing, showEdit }) => {
   const navigate = useNavigate();
   return (
     <div className="bg-white rounded-lg shadow p-4 flex flex-col gap-2 border hover:shadow-lg transition h-full min-h-[420px] max-h-[480px]">
-      {listing.images && listing.images.length > 0 && (
+      {listing.images && listing.images.length > 0 ? (
         <div className="flex gap-2 overflow-x-auto mb-2">
           {listing.images.map((url, idx) => {
-                  const fullUrl = url.startsWith('http') ? url : `http://localhost:3000${url}`;
+            const fullUrl = url.startsWith('http') ? url : `http://localhost:3000${url}`;
             return (
               <img key={idx} src={fullUrl} alt="Apartment" className="h-28 w-40 object-cover rounded border" />
             );
           })}
+        </div>
+      ) : (
+        <div className="flex justify-center items-center mb-2">
+          <img src={noImage} alt="No Apartment" className="h-28 w-40 object-cover rounded border" />
         </div>
       )}
       <div className="flex items-center justify-between">

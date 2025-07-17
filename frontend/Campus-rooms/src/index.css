@@ -1,6 +1,9 @@
+@import "tailwindcss";
+
 html {
   scroll-behavior: smooth;
 }
+
 /* Custom Animations & Gradients for CampusRooms */
 .animate-fade-in { opacity: 0; animation: fadeIn 1s forwards; }
 .animate-fade-in.delay-100 { animation-delay: .1s; }
@@ -19,4 +22,3 @@ html {
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-@import "tailwindcss";

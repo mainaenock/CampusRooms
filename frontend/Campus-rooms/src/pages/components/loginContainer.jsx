@@ -2,12 +2,14 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import { useNavigate, Link } from 'react-router-dom'
+import StudentWelcomeModal from '../../components/StudentWelcomeModal'
 
 const LoginContainer = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false)
   const navigate = useNavigate()
 
   const togglePassword = () => setShowPassword(prev => !prev)
@@ -28,15 +30,25 @@ const LoginContainer = () => {
   localStorage.setItem('token', res.data.token);
 
       toast.success('Login successful!', { id: toastId })
-      setTimeout(() => {
-        if (res.data.user && res.data.user.role === 'admin') {
-          navigate('/admin/dashboard');
-        } else if (res.data.user && res.data.user.role === 'landlord') {
-          navigate('/landlord/listings');
-        } else {
-          navigate('/');
-        }
-      }, 2000);
+      
+      // Check if user has seen the welcome modal before
+      const hasSeenWelcome = localStorage.getItem('hasSeenStudentWelcome');
+      
+      if (res.data.user && res.data.user.role === 'student' && !hasSeenWelcome) {
+        // Show welcome modal for students who haven't seen it
+        setShowWelcomeModal(true);
+      } else {
+        // Navigate immediately for non-students or students who have seen the modal
+        setTimeout(() => {
+          if (res.data.user && res.data.user.role === 'admin') {
+            navigate('/admin/dashboard');
+          } else if (res.data.user && res.data.user.role === 'landlord') {
+            navigate('/landlord/listings');
+          } else {
+            navigate('/');
+          }
+        }, 2000);
+      }
     } catch (err) {
       const msg = err.response?.data?.message || 'Login failed'
       toast.error(msg, { id: toastId })
@@ -115,6 +127,20 @@ const LoginContainer = () => {
           </Link>
         </p>
       </div>
+
+      {/* Student Welcome Modal */}
+      <StudentWelcomeModal
+        isOpen={showWelcomeModal}
+        onClose={() => {
+          setShowWelcomeModal(false);
+          // Mark that user has seen the welcome modal
+          localStorage.setItem('hasSeenStudentWelcome', 'true');
+          // Navigate after closing modal
+          setTimeout(() => {
+            navigate('/');
+          }, 500);
+        }}
+      />
     </div>
   )
 }

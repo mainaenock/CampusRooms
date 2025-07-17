@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@config {
+  darkMode: "class";
+}
+
+@theme {
+  --color-primary: #3b82f6;
+  --color-secondary: #10b981;
+  --color-accent: #ef4444;
+} 

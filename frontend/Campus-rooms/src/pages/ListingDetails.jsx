@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import LandingHeader from './components/LandingHeader';
 import ChatRoom from './components/ChatRoom';
+import FlagModal from '../components/FlagModal';
+import axios from 'axios';
 
 const ListingDetails = () => {
   const navigate = useNavigate();
@@ -10,12 +12,39 @@ const ListingDetails = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [imgModal, setImgModal] = useState({ open: false, idx: 0 });
   const [chatOpen, setChatOpen] = useState(false);
+  const [flagModalOpen, setFlagModalOpen] = useState(false);
+  const [hasFlagged, setHasFlagged] = useState(false);
   const user = JSON.parse(localStorage.getItem('user'));
 
   if (!state || !state.listing) {
     return <div className="p-8 text-center">No listing found.</div>;
   }
   const listing = state.listing;
+
+  // Check if user has already flagged this listing
+  const checkFlagStatus = async () => {
+    if (user && user.role === 'student') {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`http://localhost:3000/api/flags/check/${listing._id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setHasFlagged(response.data.hasFlagged);
+      } catch (error) {
+        console.error('Error checking flag status:', error);
+        if (error.response?.status === 401) {
+          // Token expired, redirect to login
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          navigate('/login');
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    checkFlagStatus();
+  }, [listing._id, user]);
 
   const handleShowContact = () => {
     if (!user) {
@@ -134,6 +163,22 @@ const ListingDetails = () => {
           </button>
         )}
 
+        {/* Flag Property button for students */}
+        {user && user.role === 'student' && (
+          <button
+            className={`mt-4 ml-4 px-6 py-2 rounded font-bold transition ${
+              hasFlagged 
+                ? 'bg-gray-400 text-white cursor-not-allowed' 
+                : 'bg-red-600 text-white hover:bg-red-700'
+            }`}
+            onClick={() => !hasFlagged && setFlagModalOpen(true)}
+            disabled={hasFlagged}
+            title={hasFlagged ? 'You have already flagged this property' : 'Flag this property if it is occupied or has issues'}
+          >
+            {hasFlagged ? 'Already Flagged' : 'Flag Property'}
+          </button>
+        )}
+
         {chatOpen && (
           <ChatRoom
             listingId={listing._id}
@@ -170,6 +215,20 @@ const ListingDetails = () => {
             </div>
           </>
         )}
+
+        {/* Flag Modal */}
+        <FlagModal
+          isOpen={flagModalOpen}
+          onClose={() => {
+            setFlagModalOpen(false);
+          }}
+          onFlagSuccess={() => {
+            setHasFlagged(true);
+            checkFlagStatus(); // Refresh the flag status
+          }}
+          listingId={listing._id}
+          listingName={listing.name}
+        />
       </div>
       </div>
     </>
