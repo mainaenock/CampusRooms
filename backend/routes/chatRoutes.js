@@ -1,6 +1,7 @@
 import express from 'express';
 import ChatMessage from '../models/chatMessageModel.js';
 import { stkPush } from '../mpesa/mpesaService.js';
+import { protect } from '../middlewares/auth.js';
 
 
 const router = express.Router();
@@ -50,13 +51,13 @@ router.post('/send', async (req, res) => {
 });
 
 // Get all conversations for a user (for notification/inbox)
-router.get('/user-conversations', async (req, res) => {
-  const { userId } = req.query;
-  if (!userId) return res.status(400).json({ error: 'Missing userId' });
+router.get('/user-conversations', protect, async (req, res) => {
+  const userId = req.user.id;
   try {
-    // Find all messages where user is sender or receiver
+    // Find all messages where user is sender or receiver and NOT deleted by this user
     const messages = await ChatMessage.find({
-      $or: [ { sender: userId }, { receiver: userId } ]
+      $or: [ { sender: userId }, { receiver: userId } ],
+      deletedBy: { $ne: userId }
     }).sort({ timestamp: -1 });
     // Group by listing and other user
     const convMap = {};
@@ -93,8 +94,9 @@ router.get('/user-conversations', async (req, res) => {
 
 
 // Get chat history for a listing between two users
-router.get('/history', async (req, res) => {
-  const { listingId, userId, otherId } = req.query;
+router.get('/history', protect, async (req, res) => {
+  const userId = req.user.id;
+  const { listingId, otherId } = req.query;
   if (!listingId || !userId || !otherId) {
     return res.status(400).json({ error: 'Missing required params' });
   }
@@ -107,16 +109,42 @@ router.get('/history', async (req, res) => {
       read: false
     }, { $set: { read: true } });
 
+    // Only fetch messages not deleted by this user
     const messages = await ChatMessage.find({
       listingId,
       $or: [
         { sender: userId, receiver: otherId },
         { sender: otherId, receiver: userId }
-      ]
+      ],
+      deletedBy: { $ne: userId }
     }).sort({ timestamp: 1 });
     res.json(messages);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch messages' });
+  }
+});
+
+// Soft-delete a conversation for a user
+// DELETE /api/chat/delete-conversation
+// Body: { listingId, otherUserId }
+router.delete('/delete-conversation', protect, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { listingId, otherUserId } = req.body;
+    if (!listingId || !otherUserId) {
+      return res.status(400).json({ error: 'Missing listingId or otherUserId' });
+    }
+    // Mark all messages in this conversation as deleted for this user
+    await ChatMessage.updateMany({
+      listingId,
+      $or: [
+        { sender: userId, receiver: otherUserId },
+        { sender: otherUserId, receiver: userId }
+      ]
+    }, { $addToSet: { deletedBy: userId } });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete conversation' });
   }
 });
 

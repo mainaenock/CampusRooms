@@ -5,10 +5,12 @@ import connectDb from './config/db.js';
 import regRoutes from './routes/regRoutes.js';
 import listingRoutes from './routes/listingRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import flagRoutes from './routes/flagRoutes.js';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import setupChat from './chatSocket.js';
 import chatRoutes from './routes/chatRoutes.js';
+import settingsRoutes from './routes/settingsRoutes.js';
 import { authLimiter, generalApiLimiter } from './middlewares/rateLimiter.js';
 
 dotenv.config();
@@ -46,4 +48,6 @@ connectDb().then(() => {
 app.use('/cr/reg', regRoutes);
 app.use('/api/listings', listingRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/flags', flagRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/settings', settingsRoutes);

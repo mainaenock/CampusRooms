@@ -6,7 +6,8 @@ const chatMessageSchema = new mongoose.Schema({
   receiver: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   message: { type: String, required: true },
   timestamp: { type: Date, default: Date.now, index: true },
-  read: { type: Boolean, default: false }
+  read: { type: Boolean, default: false },
+  deletedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
 
 const ChatMessage = mongoose.model('ChatMessage', chatMessageSchema);
