@@ -7,7 +7,12 @@ class PerformanceMonitor {
       userInteractions: []
     };
     this.isEnabled = this.checkAnalyticsConsent();
+    this.eventQueue = [];
+    this.sending = false;
+    this.BATCH_SIZE = 10;
+    this.BATCH_INTERVAL = 10000; // 10 seconds
     this.init();
+    this.startBatchSender();
   }
 
   init() {
@@ -261,13 +266,47 @@ class PerformanceMonitor {
     try {
       // Store metrics locally first
       this.storeMetric(type, data);
-
-      // Send to server if online
-      if (navigator.onLine) {
-        await this.sendToServer(type, data);
+      // Add to batch queue
+      this.eventQueue.push({ type, data, timestamp: Date.now() });
+      // If batch size reached, send immediately
+      if (this.eventQueue.length >= this.BATCH_SIZE) {
+        await this.flushBatch();
       }
     } catch (error) {
-      console.error('Error sending metrics:', error);
+      console.error('Error batching metrics:', error);
+    }
+  }
+
+  startBatchSender() {
+    setInterval(() => {
+      if (this.eventQueue.length > 0) {
+        this.flushBatch();
+      }
+    }, this.BATCH_INTERVAL);
+  }
+
+  async flushBatch() {
+    if (this.sending || !navigator.onLine || this.eventQueue.length === 0) return;
+    this.sending = true;
+    const batch = this.eventQueue.splice(0, this.BATCH_SIZE);
+    try {
+      const token = localStorage.getItem('token');
+      await fetch('http://localhost:3000/api/analytics/metrics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` })
+        },
+        body: JSON.stringify({ batch })
+      });
+      // Optionally clear sent metrics from local storage
+      this.clearSentMetrics();
+    } catch (error) {
+      // If failed, re-queue the batch for next try
+      this.eventQueue = batch.concat(this.eventQueue);
+      console.error('Error sending batch metrics to server:', error);
+    } finally {
+      this.sending = false;
     }
   }
 
