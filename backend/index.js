@@ -26,7 +26,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-app.use(generalApiLimiter); // Apply general rate limiter globally
+// Instead, apply it only to sensitive routes:
+app.use('/api/listings', generalApiLimiter, listingRoutes);
+app.use('/api/admin', generalApiLimiter, adminRoutes);
+app.use('/api/flags', flagRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/settings', settingsRoutes);
+// Do NOT apply to analytics:
+app.use('/api/analytics', analyticsRoutes);
 
 const PORT = process.env.PORT || 3000;
 
@@ -47,9 +54,3 @@ connectDb().then(() => {
 });
 
 app.use('/cr/reg', regRoutes);
-app.use('/api/listings', listingRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/flags', flagRoutes);
-app.use('/api/chat', chatRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/analytics', analyticsRoutes);

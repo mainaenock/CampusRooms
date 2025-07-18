@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const auth = require('../middlewares/auth');
-const isAdmin = require('../middlewares/isAdmin');
+import { protect as auth } from '../middlewares/auth.js';
+import { isAdmin } from '../middlewares/isAdmin.js';
 
 // In-memory storage for analytics (in production, use a database)
 let analyticsData = {
@@ -15,39 +15,59 @@ let analyticsData = {
 // Store metrics
 router.post('/metrics', auth, async (req, res) => {
   try {
-    const { type, data } = req.body;
     const userId = req.user._id;
-    
-    const metric = {
-      id: Date.now().toString(),
-      type,
-      data,
-      userId,
-      timestamp: new Date(),
-      userAgent: req.headers['user-agent'],
-      ip: req.ip
-    };
+    const userAgent = req.headers['user-agent'];
+    const ip = req.ip;
+    let events = [];
 
-    // Store based on type
-    switch (type) {
-      case 'pageLoad':
-        analyticsData.performance.push(metric);
-        break;
-      case 'apiCall':
-        analyticsData.metrics.push(metric);
-        break;
-      case 'error':
-        analyticsData.errors.push(metric);
-        break;
-      case 'user_action':
-      case 'customEvent':
-        analyticsData.userActions.push(metric);
-        break;
-      case 'webVital':
-        analyticsData.performance.push(metric);
-        break;
-      default:
-        analyticsData.metrics.push(metric);
+    if (Array.isArray(req.body.batch)) {
+      // Batch mode
+      events = req.body.batch.map(e => ({
+        ...e,
+        userId,
+        userAgent,
+        ip,
+        id: Date.now().toString() + Math.random().toString(36).slice(2)
+      }));
+    } else {
+      // Single event mode
+      const { type, data } = req.body;
+      events = [{
+        id: Date.now().toString(),
+        type,
+        data,
+        userId,
+        timestamp: new Date(),
+        userAgent,
+        ip
+      }];
+    }
+
+    // Store each event
+    for (const metric of events) {
+      switch (metric.type) {
+        case 'pageLoad':
+          analyticsData.performance.push(metric);
+          break;
+        case 'apiCall':
+          analyticsData.metrics.push(metric);
+          break;
+        case 'error':
+          analyticsData.errors.push(metric);
+          break;
+        case 'user_action':
+        case 'customEvent':
+          analyticsData.userActions.push(metric);
+          break;
+        case 'webVital':
+          analyticsData.performance.push(metric);
+          break;
+        case 'interaction':
+          analyticsData.userActions.push(metric);
+          break;
+        default:
+          analyticsData.metrics.push(metric);
+      }
     }
 
     // Keep only last 10000 entries to prevent memory issues
@@ -58,7 +78,7 @@ router.post('/metrics', auth, async (req, res) => {
       }
     });
 
-    res.status(200).json({ message: 'Metric stored successfully' });
+    res.status(200).json({ message: 'Metric(s) stored successfully' });
   } catch (error) {
     console.error('Error storing metric:', error);
     res.status(500).json({ message: 'Error storing metric' });
@@ -267,4 +287,4 @@ function getTopErrors(errors) {
     .slice(0, 10);
 }
 
-module.exports = router; 
+export default router; 
