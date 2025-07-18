@@ -61,7 +61,7 @@ export async function createListing(req, res) {
       paid: false,
       isFeatured: false
     });
-    res.status(201).json({ message: 'Listing created. Please pay Ksh 100 to publish.', listing });
+            res.status(201).json({ message: 'Listing created. Please pay Ksh 149 to publish.', listing });
   } catch (error) {
     res.status(500).json({ message: 'Error creating listing', error });
   }
