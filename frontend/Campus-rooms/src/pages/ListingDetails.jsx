@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import LandingHeader from './components/LandingHeader';
 import ChatRoom from './components/ChatRoom';
 import FlagModal from '../components/FlagModal';
+import BackButton from '../components/BackButton';
 import axios from 'axios';
 
 const ListingDetails = () => {
@@ -64,6 +65,9 @@ const ListingDetails = () => {
       <LandingHeader />
       <div className={`min-h-screen bg-blue-50 py-8 px-4 flex justify-center pt-24${modalOpen ? ' backdrop-blur-sm' : ''}`}> 
         <div className="max-w-4xl w-full bg-white rounded-lg shadow p-6">
+          <div className="mb-4">
+            <BackButton />
+          </div>
           {/* Image grid like Airbnb */}
           {listing.images && listing.images.length > 0 && (
             <div className="mb-6 grid grid-cols-3 grid-rows-2 gap-2 relative" style={{ minHeight: '320px' }}>

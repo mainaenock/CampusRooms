@@ -107,6 +107,23 @@ const LandlordChatRoom = ({ landlordId }) => {
     setTimeout(() => setSending(false), 400);
   };
 
+  const handleDeleteConversation = async (listingId, otherUserId) => {
+    if (!window.confirm('Are you sure you want to delete this chat?')) return;
+    try {
+      await axios.delete('http://localhost:3000/api/chat/delete-conversation', {
+        headers: { Authorization: `Bearer ${token}` },
+        data: { listingId, otherUserId }
+      });
+      setConversations(convs => convs.filter(c => !(c.listingId === listingId && c.otherUser === otherUserId)));
+      if (activeStudent && activeStudent.listingId === listingId && activeStudent.otherUser === otherUserId) {
+        setActiveStudent(null);
+        setMessages([]);
+      }
+    } catch (err) {
+      alert('Failed to delete conversation');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 pt-24 px-4">
       <button
@@ -124,14 +141,21 @@ const LandlordChatRoom = ({ landlordId }) => {
           ) : (
             <ul className="space-y-2">
               {conversations.map((conv, idx) => (
-                <li key={idx}>
+                <li key={idx} className="flex items-center justify-between gap-2">
                   <button
-                    className={`w-full text-left px-4 py-2 rounded ${activeStudent && activeStudent.otherUser === conv.otherUser ? 'bg-blue-100' : 'bg-white'} hover:bg-blue-50`}
+                    className={`flex-1 text-left px-4 py-2 rounded ${activeStudent && activeStudent.otherUser === conv.otherUser ? 'bg-blue-100' : 'bg-white'} hover:bg-blue-50`}
                     onClick={() => setActiveStudent(conv)}
                   >
                     <div className="font-semibold text-blue-700">{conv.otherUserName}</div>
                     <div className="text-xs text-gray-500">{conv.listingName}</div>
                     <div className="text-xs text-gray-400">Last: {conv.lastMessage}</div>
+                  </button>
+                  <button
+                    className="ml-2 px-2 py-1 bg-red-600 text-white rounded text-xs font-bold hover:bg-red-700 transition"
+                    title="Delete this chat"
+                    onClick={() => handleDeleteConversation(conv.listingId, conv.otherUser)}
+                  >
+                    Delete
                   </button>
                 </li>
               ))}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from './components/header';
 import StudentWelcomeModal from '../components/StudentWelcomeModal';
+import BackButton from '../components/BackButton';
 import { FaUserCircle, FaUserGraduate, FaUserTie, FaUserShield, FaEnvelope, FaFlag } from 'react-icons/fa';
 
 const getAvatarColor = (name) => {
@@ -28,6 +29,9 @@ const Profile = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Header />
       <div className="max-w-lg mx-auto mt-40 bg-white rounded-2xl shadow-xl p-8 pt-20 relative">
+        <div className="mb-4">
+          <BackButton />
+        </div>
         {/* Avatar */}
         <div className={`absolute -top-16 left-1/2 -translate-x-1/2 shadow-lg rounded-full border-4 border-white ${getAvatarColor(user.name || user.email || 'U')} w-32 h-32 flex items-center justify-center text-6xl`}> 
           {getRoleIcon(user.role)}

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaUsers, FaUserTie, FaUserGraduate, FaHome, FaMoneyBillWave, FaStar, FaFlag } from 'react-icons/fa';
+import { FaUsers, FaUserTie, FaUserGraduate, FaHome, FaMoneyBillWave, FaStar, FaFlag, FaChartLine } from 'react-icons/fa';
 import FlagDetailsModal from '../../components/FlagDetailsModal';
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal';
+import BackButton from '../../components/BackButton';
+import CacheManager from '../../components/CacheManager';
 import { useNavigate } from 'react-router-dom';
 import Switch from '@mui/material/Switch';
 
@@ -169,6 +171,12 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   if (loading) return <div className="text-center py-12">Loading admin dashboard...</div>;
 
   // Card definitions for easier mapping
@@ -222,11 +230,21 @@ const AdminDashboard = () => {
       icon: <FaFlag className="text-3xl text-red-500 mb-2" />, 
       border: 'border-red-500',
     },
+    {
+      key: 'performance',
+      label: 'Performance',
+      value: 'Monitor',
+      icon: <FaChartLine className="text-3xl text-purple-600 mb-2" />, 
+      border: 'border-purple-500',
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-10 px-2 sm:px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-4">
+          <BackButton />
+        </div>
         <h1 className="text-4xl font-extrabold text-blue-900 mb-8 text-center drop-shadow-lg animate-fade-in">
           <span className="bg-gradient-to-r from-blue-700 via-red-900 to-green-800 bg-clip-text text-transparent">Admin Dashboard</span>
         </h1>
@@ -535,6 +553,13 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
+
+        {selectedCard === 'performance' && (
+          <div className="mt-10 animate-fade-in delay-200">
+            <CacheManager />
+          </div>
+        )}
+
       </div>
 
       {/* Flag Details Modal */}

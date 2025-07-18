@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import StudentWelcomeModal from '../components/StudentWelcomeModal'
+import BackButton from '../components/BackButton'
 
 const Dashboard = () => {
   const user = JSON.parse(localStorage.getItem('user'))
@@ -16,6 +17,9 @@ const Dashboard = () => {
 
   return (
     <div className="p-6">
+      <div className="mb-4">
+        <BackButton />
+      </div>
       <h1 className="text-2xl font-semibold mb-2">Welcome, {user?.name}</h1>
       <p>Your role: {user?.role}</p>
       

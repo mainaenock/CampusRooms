@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import Header from './components/header';
+import BackButton from '../components/BackButton';
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
@@ -33,6 +34,9 @@ const ResetPassword = () => {
     <Header />
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full max-w-md bg-white shadow-md rounded-lg p-6">
+        <div className="mb-4">
+          <BackButton />
+        </div>
         <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">Reset Password</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">

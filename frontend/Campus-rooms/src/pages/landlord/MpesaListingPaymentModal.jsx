@@ -15,7 +15,7 @@ const MpesaListingPaymentModal = ({ open, onClose, onSuccess }) => {
     setError('');
     try {
       const res = await axios.post('http://localhost:3000/api/chat/mpesa/pay', {
-        amount: 100,
+        amount: 149,
         phone,
         accountReference: 'NewListing',
         transactionDesc: 'CampusRooms Listing Fee'
@@ -35,7 +35,7 @@ const MpesaListingPaymentModal = ({ open, onClose, onSuccess }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-        <h2 className="text-lg font-bold mb-4">Pay Ksh 100 to List Your House</h2>
+        <h2 className="text-lg font-bold mb-4">Pay Ksh 149 to List Your House</h2>
         <form onSubmit={handlePay} className="space-y-4">
           <input
             type="text"
@@ -50,7 +50,7 @@ const MpesaListingPaymentModal = ({ open, onClose, onSuccess }) => {
             className="w-full bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700 disabled:opacity-50"
             disabled={loading}
           >
-            {loading ? 'Processing...' : 'Pay Ksh 100'}
+            {loading ? 'Processing...' : 'Pay Ksh 149'}
           </button>
           {error && <div className="text-red-600 mt-2">{error}</div>}
           {success && <div className="text-green-600 mt-2">Payment initiated! Check your phone to complete.</div>}

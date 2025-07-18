@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import LandingHeader from '../components/LandingHeader';
 import ListingCard from '../../components/ListingCard';
+import BackButton from '../../components/BackButton';
 
 const MyListings = () => {
   const [listings, setListings] = useState([]);
@@ -56,6 +57,9 @@ const MyListings = () => {
       <LandingHeader />
       <main className="flex-1 w-full pt-28 pb-10 px-2 sm:px-4">
         <div className="max-w-7xl mx-auto">
+          <div className="mb-4">
+            <BackButton />
+          </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-blue-800 mb-8 text-center drop-shadow-lg animate-fade-in">My Listings</h1>
           {loading ? (
             <div className="text-center text-blue-700">Loading...</div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import ListingCard from '../components/ListingCard';
 import Header from './components/header';
+import BackButton from '../components/BackButton';
 
 const universities = [
   'University of Nairobi',
@@ -61,6 +62,9 @@ const Listings = () => {
       <Header />
     <div className="min-h-screen bg-blue-50 py-8 px-4">
       <div className="max-w-5xl mx-auto">
+        <div className="mb-4">
+          <BackButton />
+        </div>
         <h1 className="text-3xl font-bold text-blue-800 mb-6">Find Student Apartments</h1>
         <div className="bg-white rounded-lg shadow p-4 mb-8 flex flex-wrap gap-4 items-end">
           <div>

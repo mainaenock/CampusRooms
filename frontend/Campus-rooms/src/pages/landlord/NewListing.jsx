@@ -340,7 +340,7 @@ const NewListing = () => {
           </div>
           </div>
           <button type="submit" disabled={loading} className="w-full py-2 px-4 rounded bg-blue-600 text-white font-bold hover:bg-blue-700 transition">
-            {loading ? 'Submitting...' : requirePayment ? 'Pay Ksh 100 to Submit' : 'Submit Listing'}
+            {loading ? 'Submitting...' : requirePayment ? 'Pay Ksh 149 to Submit' : 'Submit Listing'}
           </button>
         </form>
         {/* Move modal outside the form to avoid nested <form> error */}

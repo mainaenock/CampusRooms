@@ -3,6 +3,7 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 import { useNavigate, Link } from 'react-router-dom'
 import StudentWelcomeModal from '../../components/StudentWelcomeModal'
+import BackButton from '../../components/BackButton'
 
 const LoginContainer = () => {
   const [email, setEmail] = useState('')
@@ -60,6 +61,9 @@ const LoginContainer = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full max-w-md bg-white shadow-md rounded-lg p-6">
+        <div className="mb-4">
+          <BackButton />
+        </div>
         <h2 className="text-2xl font-semibold mb-6 text-center">Login</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email */}
