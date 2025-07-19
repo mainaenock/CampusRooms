@@ -1,18 +1,10 @@
 import multer from 'multer';
-import path from 'path';
+import mongoose from 'mongoose';
+import { GridFSBucket } from 'mongodb';
 
-// Set storage engine
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Save to uploads/ directory
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Use memory storage for multer (files will be in memory temporarily)
+const storage = multer.memoryStorage();
 
-// File filter for images only
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image/')) {
     cb(null, true);
@@ -22,5 +14,56 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({ storage, fileFilter });
+
+// Custom middleware to handle GridFS upload
+export const uploadToGridFS = async (req, res, next) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return next();
+    }
+
+    const db = mongoose.connection.db;
+    const bucket = new GridFSBucket(db, { bucketName: 'uploads' });
+    
+    const uploadedFiles = [];
+    
+    for (const file of req.files) {
+      const filename = `${Date.now()}-${file.originalname}`;
+      const uploadStream = bucket.openUploadStream(filename, {
+        metadata: {
+          uploadedBy: req.user ? req.user.id : null,
+          originalname: file.originalname,
+          mimetype: file.mimetype
+        }
+      });
+
+      // Write file buffer to GridFS
+      await new Promise((resolve, reject) => {
+        uploadStream.end(file.buffer, (error) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      uploadedFiles.push({
+        id: uploadStream.id,
+        filename: filename,
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size
+      });
+    }
+
+    // Attach uploaded files to request object
+    req.uploadedFiles = uploadedFiles;
+    next();
+  } catch (error) {
+    console.error('GridFS upload error:', error);
+    res.status(500).json({ message: 'Error uploading files', error: error.message });
+  }
+};
 
 export default upload;

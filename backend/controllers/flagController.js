@@ -121,6 +121,44 @@ export async function updateFlagStatus(req, res) {
   }
 }
 
+// Admin: Unflag a listing completely (delete all flags)
+export async function unflagListing(req, res) {
+  console.log('unflagListing function called with params:', req.params);
+  console.log('unflagListing function called with body:', req.body);
+  
+  try {
+    const { listingId } = req.params;
+
+    // Check if listing exists
+    const listing = await Listing.findById(listingId);
+    if (!listing) {
+      return res.status(404).json({ message: 'Listing not found' });
+    }
+
+    // Check if listing has any flags
+    const flagCount = await Flag.countDocuments({ listing: listingId });
+    if (flagCount === 0) {
+      return res.status(400).json({ message: 'This listing has no flags to remove' });
+    }
+
+    // Delete all flags for this listing
+    await Flag.deleteMany({ listing: listingId });
+
+    // Reset listing flag count to 0
+    listing.flagCount = 0;
+    await listing.save();
+
+    res.json({ 
+      message: 'Listing unflagged successfully',
+      removedFlags: flagCount,
+      listingId: listingId
+    });
+  } catch (error) {
+    console.error('Error unflagging listing:', error);
+    res.status(500).json({ message: 'Error unflagging listing', error: error.message });
+  }
+}
+
 // Student: Check if user has flagged a listing
 export async function checkUserFlag(req, res) {
   try {

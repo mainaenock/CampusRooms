@@ -5,6 +5,12 @@ import { protect } from '../middlewares/auth.js';
 
 
 const router = express.Router();
+
+// Test endpoint to check if route is working
+router.get('/test', (req, res) => {
+  res.json({ message: 'Chat route is working' });
+});
+
 // Get count of unread messages for a user
 router.get('/unread-count', async (req, res) => {
   const { userId } = req.query;

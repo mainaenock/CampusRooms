@@ -40,12 +40,15 @@ export async function createListing(req, res) {
     const { name, university, distance, rent, depositRequired, amenities, roomType, phoneNumber } = req.body;
     const landlord = req.user.id;
     let images = [];
-    if (req.files && req.files.length > 0) {
-      images = req.files.map(file => `/uploads/${file.filename}`);
+    
+    if (req.uploadedFiles && req.uploadedFiles.length > 0) {
+      // Use the GridFS file IDs from our custom upload middleware
+      images = req.uploadedFiles.map(file => file.id);
     } else if (req.body.images) {
-      // fallback for images sent as URLs (optional)
+      // fallback for images sent as Upload ObjectIds (optional)
       images = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
     }
+    
     const listing = await Listing.create({
       name,
       university,
@@ -61,7 +64,7 @@ export async function createListing(req, res) {
       paid: false,
       isFeatured: false
     });
-            res.status(201).json({ message: 'Listing created. Please pay Ksh 149 to publish.', listing });
+    res.status(201).json({ message: 'Listing created. Please pay Ksh 149 to publish.', listing });
   } catch (error) {
     res.status(500).json({ message: 'Error creating listing', error });
   }

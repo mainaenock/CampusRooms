@@ -3,6 +3,87 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import sendEmail from '../utils/sendEmail.js'; 
+import axios from 'axios';
+
+// Google Sign-In handler
+export async function googleSignIn(req, res) {
+  try {
+    const { idToken, role } = req.body;
+
+    if (!idToken || !role) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Verify Google ID token using Google's public API
+    try {
+      const response = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+      const payload = response.data;
+      
+      const { email, given_name, family_name, picture, sub } = payload;
+
+      // Check if user already exists
+      let user = await User.findOne({ email });
+
+      if (user) {
+        // User exists, log them in
+        const token = jwt.sign(
+          { id: user._id, role: user.role },
+          process.env.JWT_SECRET,
+          { expiresIn: '12h' }
+        );
+
+        return res.status(200).json({
+          message: 'Login successful',
+          token,
+          user: {
+            _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            name: `${user.firstName} ${user.lastName}`,
+            role: user.role,
+            email: user.email
+          }
+        });
+      } else {
+        // Create new user
+        const newUser = await User.create({
+          firstName: given_name,
+          lastName: family_name,
+          email,
+          role,
+          password: crypto.randomBytes(32).toString('hex'), // Random password for Google users
+          googleId: sub,
+          profilePicture: picture
+        });
+
+        const token = jwt.sign(
+          { id: newUser._id, role: newUser.role },
+          process.env.JWT_SECRET,
+          { expiresIn: '12h' }
+        );
+
+        res.status(201).json({
+          message: 'User created successfully',
+          token,
+          user: {
+            _id: newUser._id,
+            firstName: newUser.firstName,
+            lastName: newUser.lastName,
+            name: `${newUser.firstName} ${newUser.lastName}`,
+            role: newUser.role,
+            email: newUser.email
+          }
+        });
+      }
+    } catch (verifyError) {
+      console.error('Google token verification failed:', verifyError);
+      return res.status(401).json({ message: 'Invalid Google token' });
+    }
+  } catch (error) {
+    console.error('Google Sign-In error:', error);
+    res.status(500).json({ message: 'Google Sign-In failed' });
+  }
+}
 
 
 export async function createUser(req, res) {
@@ -27,7 +108,17 @@ export async function createUser(req, res) {
       password: hashedPassword
     });
 
-    res.status(201).json({ message: 'User created', user: newUser });
+    res.status(201).json({ 
+      message: 'User created', 
+      user: {
+        _id: newUser._id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        name: `${newUser.firstName} ${newUser.lastName}`,
+        role: newUser.role,
+        email: newUser.email
+      }
+    });
   } catch (error) {
     console.error('User creating function error:', error);
     res.status(500).json({ message: "Server error while creating user" });
@@ -73,7 +164,9 @@ export async function loginUser(req, res) {
       message: "Login successful",
       token,
       user: {
-        id: user._id,
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
         name: `${user.firstName} ${user.lastName}`,
         role: user.role,
         email: user.email
@@ -102,13 +195,13 @@ export async function forgotPassword(req, res) {
   user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
   await user.save();
 
-  const resetURL = `http://localhost:5173/reset-password/${token}`;
+  const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${token}`;
   const message = `
     <h2>Password Reset Requested</h2>
     <p>Hello ${user.firstName},</p>
     <p>You requested to reset your password. Click the button below:</p>
     <a href="${resetURL}" style="display:inline-block;padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:5px;">Reset Password</a>
-    <p>If you didn’t request this, just ignore this email.</p>
+    <p>If you didn't request this, just ignore this email.</p>
   `;
 
   try {
@@ -155,11 +248,12 @@ export async function resetPassword(req, res) {
     message: 'Password reset successfully',
     token: jwtToken,
     user: {
-      id: user._id,
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
       name: `${user.firstName} ${user.lastName}`,
       role: user.role,
       email: user.email
     }
   });
 }
-

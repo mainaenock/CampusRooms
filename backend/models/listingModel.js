@@ -38,7 +38,8 @@ const listingSchema = new mongoose.Schema({
     default: false
   },
   images: [{
-    type: String // URLs or file paths
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Upload'
   }],
   phoneNumber: {
     type: String,

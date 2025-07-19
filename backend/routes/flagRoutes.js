@@ -1,9 +1,17 @@
 import express from 'express';
-import { flagListing, getFlagsForListing, getFlaggedListings, updateFlagStatus, checkUserFlag } from '../controllers/flagController.js';
+import { flagListing, getFlagsForListing, getFlaggedListings, updateFlagStatus, checkUserFlag, unflagListing } from '../controllers/flagController.js';
 import { protect } from '../middlewares/auth.js';
 import { isAdmin } from '../middlewares/isAdmin.js';
 
 const router = express.Router();
+
+// Test route to verify flag routes are working
+router.get('/test', (req, res) => {
+  res.json({ message: 'Flag routes are working' });
+});
+
+// Admin: Unflag a listing completely (must come before /:listingId route)
+router.delete('/unflag/:listingId', protect, isAdmin, unflagListing);
 
 // Student: Flag a listing
 router.post('/:listingId', protect, flagListing);
