@@ -22,14 +22,26 @@ const Messages = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
     const userId = user._id || user.id;
-    if (!userId) return;
+    if (!userId) {
+      return;
+    }
+    
+    const token = localStorage.getItem('token');
+    
     axios.get('http://localhost:3000/api/chat/user-conversations', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => setConversations(res.data))
-      .catch(() => setConversations([]));
+      .then(res => {
+        setConversations(res.data);
+      })
+      .catch(err => {
+        console.error('API error:', err.response?.status, err.response?.data);
+        setConversations([]);
+      });
   }, [user]);
 
   const handleDeleteConversation = async (listingId, otherUserId, key) => {

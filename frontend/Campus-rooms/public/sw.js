@@ -25,9 +25,22 @@ self.addEventListener('install', (event) => {
     caches.open(STATIC_CACHE)
       .then((cache) => {
         console.log('Caching static files');
-        return cache.addAll(STATIC_FILES);
+        // Use addAll with error handling
+        return Promise.allSettled(
+          STATIC_FILES.map(file => 
+            cache.add(file).catch(err => {
+              console.warn(`Failed to cache ${file}:`, err);
+              return null;
+            })
+          )
+        );
       })
       .then(() => self.skipWaiting())
+      .catch(err => {
+        console.warn('Service worker install failed:', err);
+        // Still skip waiting even if caching fails
+        return self.skipWaiting();
+      })
   );
 });
 
@@ -54,17 +67,24 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Handle API requests
-  if (url.pathname.startsWith('/api/')) {
+  // Skip unsupported request types
+  if (request.method !== 'GET' || 
+      url.protocol === 'chrome-extension:' || 
+      url.protocol === 'moz-extension:' ||
+      url.protocol === 'chrome:' ||
+      url.protocol === 'moz:' ||
+      url.protocol === 'safari-extension:') {
+    return;
+  }
+
+  // Handle API requests (but exclude image requests)
+  if (url.pathname.startsWith('/api/') && !url.pathname.includes('/image/')) {
     event.respondWith(handleApiRequest(request));
     return;
   }
 
   // Handle static files
-  if (request.method === 'GET') {
-    event.respondWith(handleStaticRequest(request));
-    return;
-  }
+  event.respondWith(handleStaticRequest(request));
 });
 
 // Handle API requests with cache-first strategy
@@ -74,18 +94,26 @@ async function handleApiRequest(request) {
     const networkResponse = await fetch(request);
     
     if (networkResponse.ok) {
-      // Cache successful responses
-      const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, networkResponse.clone());
+      // Only cache GET requests
+      if (request.method === 'GET') {
+        try {
+          const cache = await caches.open(DYNAMIC_CACHE);
+          cache.put(request, networkResponse.clone());
+        } catch (cacheError) {
+          console.warn('Failed to cache API response:', cacheError);
+        }
+      }
       return networkResponse;
     }
     
     throw new Error('Network response not ok');
   } catch (error) {
-    // Fallback to cache
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
+    // Fallback to cache for GET requests only
+    if (request.method === 'GET') {
+      const cachedResponse = await caches.match(request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
     }
     
     // Return offline response for API requests
@@ -117,8 +145,12 @@ async function handleStaticRequest(request) {
     
     if (networkResponse.ok) {
       // Cache successful responses
-      const cache = await caches.open(STATIC_CACHE);
-      cache.put(request, networkResponse.clone());
+      try {
+        const cache = await caches.open(STATIC_CACHE);
+        cache.put(request, networkResponse.clone());
+      } catch (cacheError) {
+        console.warn('Failed to cache static file:', cacheError);
+      }
     }
     
     return networkResponse;

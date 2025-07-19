@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getImageUrl } from '../utils/imageUtils.js';
 
 const ListingCardLanding = ({ listing }) => {
   const navigate = useNavigate();
@@ -9,7 +10,11 @@ const ListingCardLanding = ({ listing }) => {
       onClick={() => navigate('/listing-details', { state: { listing } })}
     >
       <div className="relative">
-        <img src={listing.images && listing.images[0] ? (listing.images[0].startsWith('http') ? listing.images[0] : `http://localhost:3000${listing.images[0]}`) : 'https://via.placeholder.com/300x180?text=No+Image'} alt={listing.name} className="w-full h-44 object-cover rounded-t-xl" />
+        <img 
+          src={listing.images && listing.images[0] ? getImageUrl(listing.images[0]) : 'https://via.placeholder.com/300x180?text=No+Image'} 
+          alt={listing.name} 
+          className="w-full h-44 object-cover rounded-t-xl" 
+        />
         {listing.isFeatured && <span className="absolute top-2 left-2 bg-white text-gray-800 text-xs font-bold px-2 py-1 rounded shadow">Featured</span>}
         <button className="absolute top-2 right-2 bg-white rounded-full p-2 shadow hover:bg-gray-100"><span>&#9825;</span></button>
       </div>

@@ -4,6 +4,7 @@ import LandingHeader from './components/LandingHeader';
 import ChatRoom from './components/ChatRoom';
 import FlagModal from '../components/FlagModal';
 import BackButton from '../components/BackButton';
+import { getImageUrl } from '../utils/imageUtils.js';
 import axios from 'axios';
 
 const ListingDetails = () => {
@@ -15,7 +16,12 @@ const ListingDetails = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [flagModalOpen, setFlagModalOpen] = useState(false);
   const [hasFlagged, setHasFlagged] = useState(false);
-  const user = JSON.parse(localStorage.getItem('user'));
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    setUser(userData);
+  }, []);
 
   if (!state || !state.listing) {
     return <div className="p-8 text-center">No listing found.</div>;
@@ -74,7 +80,7 @@ const ListingDetails = () => {
               {/* Main image */}
               <div className="row-span-2 col-span-2">
                 <img
-                  src={listing.images[0].startsWith('http') ? listing.images[0] : `http://localhost:3000${listing.images[0]}`}
+                  src={getImageUrl(listing.images[0])}
                   alt={listing.name + ' 1'}
                   className="w-full h-full object-cover rounded-l-lg rounded-tr-none rounded-br-none cursor-pointer"
                   style={{ minHeight: '320px', maxHeight: '420px' }}
@@ -82,10 +88,10 @@ const ListingDetails = () => {
                 />
               </div>
               {/* Up to 4 more images */}
-              {listing.images.slice(1, 5).map((img, idx) => (
+              {listing.images.slice(1, 5).map((imageId, idx) => (
                 <div key={idx} className={`overflow-hidden ${idx === 1 ? 'rounded-tr-lg' : ''} ${idx === 3 ? 'rounded-br-lg' : ''}`}>
                   <img
-                    src={img.startsWith('http') ? img : `http://localhost:3000${img}`}
+                    src={getImageUrl(imageId)}
                     alt={listing.name + ' ' + (idx + 2)}
                     className="w-full h-full object-cover cursor-pointer"
                     style={{ minHeight: '155px', maxHeight: '210px' }}
@@ -127,7 +133,7 @@ const ListingDetails = () => {
             &#8592;
           </button>
           <img
-            src={listing.images[imgModal.idx].startsWith('http') ? listing.images[imgModal.idx] : `http://localhost:3000${listing.images[imgModal.idx]}`}
+            src={getImageUrl(listing.images[imgModal.idx])}
             alt={listing.name + ' ' + (imgModal.idx + 1)}
             className="max-h-[80vh] max-w-[90vw] rounded shadow-lg border-4 border-white"
             style={{background:'#fff'}}
@@ -142,6 +148,7 @@ const ListingDetails = () => {
           </button>
         </div>
       )}
+      
         <h2 className="text-2xl font-bold text-blue-800 mb-2">{listing.name}</h2>
         <div className="text-gray-700 mb-2">{listing.university} &bull; {listing.distance}m from campus gate</div>
         <div className="text-lg font-semibold text-green-700 mb-2">KSh {listing.rent} per month</div>
@@ -167,32 +174,31 @@ const ListingDetails = () => {
           </button>
         )}
 
-        {/* Flag Property button for students */}
+        {/* Flag button for students */}
         {user && user.role === 'student' && (
           <button
-            className={`mt-4 ml-4 px-6 py-2 rounded font-bold transition ${
-              hasFlagged 
-                ? 'bg-gray-400 text-white cursor-not-allowed' 
-                : 'bg-red-600 text-white hover:bg-red-700'
-            }`}
-            onClick={() => !hasFlagged && setFlagModalOpen(true)}
+            className={`mt-4 ml-4 px-6 py-2 rounded font-bold transition ${hasFlagged ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-red-600 text-white hover:bg-red-700'}`}
+            onClick={() => {
+              if (!hasFlagged) setFlagModalOpen(true);
+            }}
             disabled={hasFlagged}
-            title={hasFlagged ? 'You have already flagged this property' : 'Flag this property if it is occupied or has issues'}
           >
-            {hasFlagged ? 'Already Flagged' : 'Flag Property'}
+            {hasFlagged ? 'Flagged Listing' : 'Flag Listing'}
           </button>
         )}
 
+        {/* Chat Room */}
         {chatOpen && (
           <ChatRoom
             listingId={listing._id}
-            userId={user && (user._id || user.id) ? (user._id || user.id) : ''}
+            userId={user?._id || user?.id}
             receiverId={listing.landlord?._id}
-            userName={user?.firstName || 'You'}
-            receiverName={listing.landlord?.firstName || 'Landlord'}
+            userName={`${user?.firstName} ${user?.lastName}`}
+            receiverName={`${listing.landlord?.firstName} ${listing.landlord?.lastName}`}
             onClose={() => setChatOpen(false)}
           />
         )}
+
         {modalOpen && (
           <>
             {/* Modal overlay with blur */}
@@ -225,6 +231,7 @@ const ListingDetails = () => {
           isOpen={flagModalOpen}
           onClose={() => {
             setFlagModalOpen(false);
+            checkFlagStatus(); // Always refresh flag status when modal closes
           }}
           onFlagSuccess={() => {
             setHasFlagged(true);

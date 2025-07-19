@@ -7,17 +7,31 @@ import { io } from 'socket.io-client';
 const SOCKET_URL = 'http://localhost:3000';
 
 const ChatRoom = ({ listingId, userId, receiverId, userName, receiverName, onClose }) => {
+  // Try to get userId from localStorage as fallback
+  const getUserId = () => {
+    if (userId) return userId;
+    const userData = JSON.parse(localStorage.getItem('user'));
+    return userData?._id;
+  };
+  
+  const currentUserId = getUserId();
+  
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [socket, setSocket] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     let cancel = false;
+    let socketInstance = null;
+    
     async function fetchHistory() {
-      if (!listingId || !userId || !receiverId) return;
+      if (!listingId || !currentUserId || !receiverId) {
+        console.warn('Missing required props for chat:', { listingId, currentUserId, receiverId });
+        return;
+      }
       setLoading(true);
       try {
         const res = await axios.get('http://localhost:3000/api/chat/history', {
@@ -29,23 +43,58 @@ const ChatRoom = ({ listingId, userId, receiverId, userName, receiverName, onClo
         });
         if (!cancel) setMessages(res.data || []);
       } catch (err) {
-        // Optionally handle error
+        console.error('Error fetching chat history:', err);
       }
       setLoading(false);
     }
+    
+    async function setupSocket() {
+      if (!listingId || !currentUserId) {
+        console.warn('Cannot setup socket: missing listingId or userId');
+        return;
+      }
+      
+      try {
+        socketInstance = io(SOCKET_URL, { 
+          transports: ['websocket', 'polling'],
+          timeout: 5000,
+          reconnection: true,
+          reconnectionAttempts: 5,
+          withCredentials: true
+        });
+        
+        socketInstance.on('connect', () => {
+          socketInstance.emit('joinRoom', { listingId, userId: currentUserId });
+        });
+        
+        socketInstance.on('connect_error', (error) => {
+          console.error('Socket connection error:', error);
+        });
+        
+        socketInstance.on('disconnect', (reason) => {
+          // Socket disconnected
+        });
+        
+        socketInstance.on('chatMessage', (msg) => {
+          setMessages((prev) => [...prev, msg]);
+        });
+        
+        setSocket(socketInstance);
+      } catch (error) {
+        console.error('Error setting up socket:', error);
+      }
+    }
+    
     fetchHistory();
-
-    const s = io(SOCKET_URL, { transports: ['websocket'] });
-    setSocket(s);
-    s.emit('joinRoom', { listingId, userId });
-    s.on('chatMessage', (msg) => {
-      setMessages((prev) => [...prev, msg]);
-    });
+    setupSocket();
+    
     return () => {
       cancel = true;
-      s.disconnect();
+      if (socketInstance) {
+        socketInstance.disconnect();
+      }
     };
-  }, [listingId, userId, receiverId]);
+  }, [listingId, currentUserId, receiverId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -54,22 +103,33 @@ const ChatRoom = ({ listingId, userId, receiverId, userName, receiverName, onClo
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-    if (!userId) {
-      console.warn('Cannot send message: userId is missing');
+    
+    if (!currentUserId) {
+      console.error('Cannot send message: userId is missing');
       return;
     }
+    
+    if (!socket || !socket.connected) {
+      console.error('Cannot send message: socket not connected');
+      return;
+    }
+    
     setSending(true);
     const msg = {
       listingId,
-      sender: userId,
+      sender: currentUserId,
       receiver: receiverId,
       message: input.trim(),
     };
-    if (socket) {
+    
+    try {
       socket.emit('chatMessage', msg);
+      setInput('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setTimeout(() => setSending(false), 400);
     }
-    setInput('');
-    setTimeout(() => setSending(false), 400);
   };
 
   return (
@@ -86,10 +146,10 @@ const ChatRoom = ({ listingId, userId, receiverId, userName, receiverName, onClo
             <div className="text-center text-gray-400 mt-8">No messages yet.</div>
           ) : (
             messages.map((msg, idx) => (
-              <div key={idx} className={`flex ${msg.sender === userId ? 'justify-end' : 'justify-start'}`}>
-                <div className={`px-3 py-2 rounded-lg max-w-xs ${msg.sender === userId ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>
+              <div key={idx} className={`flex ${msg.sender === currentUserId ? 'justify-end' : 'justify-start'}`}>
+                <div className={`px-3 py-2 rounded-lg max-w-xs ${msg.sender === currentUserId ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}`}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold">{msg.sender === userId ? userName : receiverName}</span>
+                    <span className="text-xs font-semibold">{msg.sender === currentUserId ? userName : receiverName}</span>
                     <span className="text-[10px] text-gray-400 ml-2">{msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString() : ''}</span>
                   </div>
                   <div>{msg.message}</div>

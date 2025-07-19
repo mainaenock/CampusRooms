@@ -66,6 +66,33 @@ const FlagDetailsModal = ({ isOpen, onClose, listingId, listingName, onFlagUpdat
     }
   };
 
+  const unflagListing = async () => {
+    if (!window.confirm('Are you sure you want to unflag this listing? This will remove all flags and make the listing available to students again.')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`http://localhost:3000/api/flags/unflag/${listingId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      alert('Listing unflagged successfully!');
+      
+      // Call parent callback to refresh flagged listings
+      if (onFlagUpdate) {
+        onFlagUpdate();
+      }
+      
+      // Close the modal
+      onClose();
+    } catch (error) {
+      console.error('Error unflagging listing:', error);
+      const message = error.response?.data?.message || 'Failed to unflag listing.';
+      alert(message);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -95,12 +122,21 @@ const FlagDetailsModal = ({ isOpen, onClose, listingId, listingName, onFlagUpdat
             <FaFlag className="text-red-600" />
             Flag Details for {listingName}
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
-          >
-            &times;
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={unflagListing}
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-sm font-medium"
+              title="Unflag this listing completely"
+            >
+              Unflag Listing
+            </button>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+            >
+              &times;
+            </button>
+          </div>
         </div>
 
         {loading ? (

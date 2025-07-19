@@ -44,7 +44,7 @@ const LoginContainer = () => {
           if (res.data.user && res.data.user.role === 'admin') {
             navigate('/admin/dashboard');
           } else if (res.data.user && res.data.user.role === 'landlord') {
-            navigate('/landlord/listings');
+            navigate('/');
           } else {
             navigate('/');
           }

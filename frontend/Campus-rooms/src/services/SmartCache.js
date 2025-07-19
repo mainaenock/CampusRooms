@@ -184,8 +184,8 @@ class SmartCache {
   async preloadData() {
     const preloadTasks = [
       this.preloadListings(),
-      this.preloadUniversities(),
-      this.preloadUserPreferences()
+      this.preloadUniversities()
+      // this.preloadUserPreferences() // Disabled - endpoint doesn't exist
     ];
 
     try {
@@ -227,24 +227,24 @@ class SmartCache {
   }
 
   // Preload user preferences
-  async preloadUserPreferences() {
-    try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (user._id) {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:3000/api/user/preferences`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+  // async preloadUserPreferences() {
+  //   try {
+  //     const user = JSON.parse(localStorage.getItem('user') || '{}');
+  //     if (user._id) {
+  //       const token = localStorage.getItem('token');
+  //       const response = await fetch(`http://localhost:3000/api/user/preferences`, {
+  //         headers: { Authorization: `Bearer ${token}` }
+  //       });
         
-        if (response.ok) {
-          const preferences = await response.json();
-          this.set(`userPreferences_${user._id}`, preferences, 30 * 60 * 1000); // 30 minutes TTL
-        }
-      }
-    } catch (error) {
-      console.error('Error preloading user preferences:', error);
-    }
-  }
+  //       if (response.ok) {
+  //         const preferences = await response.json();
+  //         this.set(`userPreferences_${user._id}`, preferences, 30 * 60 * 1000); // 30 minutes TTL
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error preloading user preferences:', error);
+  //   }
+  // }
 
   // Cache listings with smart invalidation
   async cacheListings(filters = {}) {
@@ -288,7 +288,7 @@ class SmartCache {
   invalidateUserCache(userId) {
     this.invalidatePattern(`user_${userId}`);
     this.invalidatePattern('userData');
-    this.invalidatePattern('userPreferences');
+    // this.invalidatePattern('userPreferences'); // Disabled - feature not implemented
   }
 
   // Invalidate listings cache

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import noImage from '../assets/No_Image_Available.jpg';
+import { getImageUrl } from '../utils/imageUtils.js';
 
 const ListingCard = ({ listing, showEdit }) => {
   const navigate = useNavigate();
@@ -8,10 +9,10 @@ const ListingCard = ({ listing, showEdit }) => {
     <div className="bg-white rounded-lg shadow p-4 flex flex-col gap-2 border hover:shadow-lg transition h-full min-h-[420px] max-h-[480px]">
       {listing.images && listing.images.length > 0 ? (
         <div className="flex gap-2 overflow-x-auto mb-2">
-          {listing.images.map((url, idx) => {
-            const fullUrl = url.startsWith('http') ? url : `http://localhost:3000${url}`;
+          {listing.images.map((imageId, idx) => {
+            const imageUrl = getImageUrl(imageId);
             return (
-              <img key={idx} src={fullUrl} alt="Apartment" className="h-28 w-40 object-cover rounded border" />
+              <img key={idx} src={imageUrl} alt="Apartment" className="h-28 w-40 object-cover rounded border" />
             );
           })}
         </div>

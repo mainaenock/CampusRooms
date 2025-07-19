@@ -31,7 +31,7 @@ const ForgotPassword = () => {
     if (cooldown > 0) return;
 
     try {
-        await axios.post('https://28db47844d9d.ngrok-free.app/cr/reg/forgot-password', { email });
+        await axios.post('http://localhost:3000/cr/reg/forgot-password', { email });
       toast.success('Reset link sent to your email');
       setCooldown(30); // Start cooldown after success
     } catch (err) {

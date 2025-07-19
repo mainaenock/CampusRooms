@@ -23,7 +23,9 @@ const ResetPassword = () => {
       localStorage.setItem('user', JSON.stringify(res.data.user));
 
       toast.success('Password reset successful');
-      navigate('/dashboard');
+      
+      // Navigate all users to landing page to avoid back button issues
+      navigate('/');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Reset failed');
     }
