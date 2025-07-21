@@ -87,7 +87,7 @@ const RegContainer = () => {
     script.onload = () => {
       if (window.google) {
         window.google.accounts.id.initialize({
-          client_id: 'YOUR_GOOGLE_CLIENT_ID', // Replace with your actual Google Client ID from Google Cloud Console
+          client_id: '317024847492-ks4abdu2k3bo15jol01o8ii3ipmvh1fo.apps.googleusercontent.com', 
           callback: handleGoogleSignIn,
           auto_select: false,
           cancel_on_tap_outside: true,
