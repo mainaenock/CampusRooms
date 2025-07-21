@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaFlag, FaTimes, FaCheck, FaEye } from 'react-icons/fa';
+import API_BASE_URL from '../config/api';
 
 const FlagDetailsModal = ({ isOpen, onClose, listingId, listingName, onFlagUpdate }) => {
   const [flags, setFlags] = useState([]);
@@ -16,7 +17,7 @@ const FlagDetailsModal = ({ isOpen, onClose, listingId, listingName, onFlagUpdat
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:3000/api/flags/listing/${listingId}`, {
+      const response = await axios.get(`${API_BASE_URL}/api/flags/listing/${listingId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFlags(response.data);
@@ -30,7 +31,7 @@ const FlagDetailsModal = ({ isOpen, onClose, listingId, listingName, onFlagUpdat
   const updateFlagStatus = async (flagId, newStatus) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:3000/api/flags/${flagId}/status`, {
+      await axios.put(`${API_BASE_URL}/api/flags/${flagId}/status`, {
         status: newStatus
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -73,7 +74,7 @@ const FlagDetailsModal = ({ isOpen, onClose, listingId, listingName, onFlagUpdat
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3000/api/flags/unflag/${listingId}`, {
+      await axios.delete(`${API_BASE_URL}/api/flags/unflag/${listingId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       

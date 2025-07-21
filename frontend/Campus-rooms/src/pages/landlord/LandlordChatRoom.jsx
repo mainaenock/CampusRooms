@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import API_BASE_URL from '../../config/api';
 
-const SOCKET_URL = 'http://localhost:3000';
+const SOCKET_URL = API_BASE_URL;
 
 const LandlordChatRoom = ({ landlordId }) => {
   const navigate = useNavigate();

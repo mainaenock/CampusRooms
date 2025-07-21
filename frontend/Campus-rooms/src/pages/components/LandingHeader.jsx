@@ -3,6 +3,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import ProfileMenu from '../../components/ProfileMenu';
 import React, { useEffect, useState } from 'react';
+import API_BASE_URL from '../../config/api';
 
 
 const LandingHeader = () => {
@@ -14,7 +15,7 @@ const LandingHeader = () => {
     if (!user) return;
     const userId = user._id || user.id;
     if (!userId) return;
-    fetch(`http://localhost:3000/api/chat/unread-count?userId=${userId}`)
+    fetch(`${API_BASE_URL}/api/chat/unread-count?userId=${userId}`)
       .then(res => res.json())
       .then(data => setUnreadCount(data.count || 0))
       .catch(() => setUnreadCount(0));

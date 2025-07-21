@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config/api';
 
 const FlagModal = ({ isOpen, onClose, listingId, listingName, onFlagSuccess }) => {
   const [reason, setReason] = useState('occupied');
@@ -13,7 +14,7 @@ const FlagModal = ({ isOpen, onClose, listingId, listingName, onFlagSuccess }) =
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`http://localhost:3000/api/flags/${listingId}`, {
+      await axios.post(`${API_BASE_URL}/api/flags/${listingId}`, {
         reason,
         description
       }, {

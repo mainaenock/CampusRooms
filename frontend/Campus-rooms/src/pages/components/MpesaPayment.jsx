@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../../config/api';
 
 const MpesaPayment = ({ amount, accountReference, transactionDesc, onSuccess }) => {
   const [phone, setPhone] = useState('');
@@ -12,7 +13,7 @@ const MpesaPayment = ({ amount, accountReference, transactionDesc, onSuccess }) 
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:3000/api/chat/mpesa/pay', {
+      const res = await axios.post(`${API_BASE_URL}/api/chat/mpesa/pay`, {
         amount,
         phone,
         accountReference,
