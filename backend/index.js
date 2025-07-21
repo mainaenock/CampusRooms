@@ -22,8 +22,8 @@ app.use(express.json());
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
-  "https://campusroomske.netlify.app/", // Netlify
-  "https://campus-rooms.vercel.app/",  // Vercel
+  "https://campusroomske.netlify.app", // Netlify
+  "https://campus-rooms.vercel.app",  // Vercel
   "https://your-custom-domain.com"     // Custom domain
 ];
 app.use(cors({
