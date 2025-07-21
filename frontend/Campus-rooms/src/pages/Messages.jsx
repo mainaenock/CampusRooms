@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ChatRoom from './components/ChatRoom';
 import { FaArrowLeft, FaComments, FaUserCircle, FaHome, FaClock, FaEnvelope, FaTrash } from 'react-icons/fa';
+import API_BASE_URL from '../config/api';
 
 const getAvatarColor = (name) => {
   // Simple hash for color
@@ -32,7 +33,7 @@ const Messages = () => {
     
     const token = localStorage.getItem('token');
     
-    axios.get('http://localhost:3000/api/chat/user-conversations', {
+    axios.get(`${API_BASE_URL}/api/chat/user-conversations`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => {
@@ -48,7 +49,7 @@ const Messages = () => {
     if (!window.confirm('Are you sure you want to delete this conversation? This cannot be undone for your account.')) return;
     setDeleting(key);
     try {
-      await axios.delete('http://localhost:3000/api/chat/delete-conversation', {
+      await axios.delete(`${API_BASE_URL}/api/chat/delete-conversation`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         data: { listingId, otherUserId }
       });

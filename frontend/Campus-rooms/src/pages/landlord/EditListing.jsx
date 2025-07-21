@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_BASE_URL from '../../config/api';
 
 const EditListing = () => {
   const { id } = useParams();
@@ -21,7 +22,7 @@ const EditListing = () => {
   useEffect(() => {
     // Fetch listing details
     const token = localStorage.getItem('token');
-    axios.get(`http://localhost:3000/api/listings/${id}`, {
+    axios.get(`${API_BASE_URL}/api/listings/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => setForm(res.data))
@@ -41,7 +42,7 @@ const EditListing = () => {
     setLoading(true);
     const token = localStorage.getItem('token');
     try {
-      await axios.put(`http://localhost:3000/api/listings/${id}`, form, {
+      await axios.put(`${API_BASE_URL}/api/listings/${id}`, form, {
         headers: { Authorization: `Bearer ${token}` }
       });
       navigate('/landlord/listings');

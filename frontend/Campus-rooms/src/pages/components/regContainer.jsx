@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useNavigate, Link } from 'react-router-dom';
 import BackButton from '../../components/BackButton';
 import StudentWelcomeModal from '../../components/StudentWelcomeModal';
+import API_BASE_URL from '../../config/api';
 
 const RegContainer = () => {
   const [firstName, setFirstName] = useState('');
@@ -38,7 +39,7 @@ const RegContainer = () => {
       const idToken = googleUser.credential;
       
       // Send Google token to backend for verification and registration
-      const response = await axios.post('http://localhost:3000/cr/reg/google', {
+      const response = await axios.post(`${API_BASE_URL}/cr/reg/google`, {
         idToken,
         role
       });
@@ -132,12 +133,12 @@ const RegContainer = () => {
     const payload = { firstName, lastName, role, email, password };
 
     try {
-      await axios.post('http://localhost:3000/cr/reg', payload);
+      await axios.post(`${API_BASE_URL}/cr/reg`, payload);
       toast.success('Registered successfully! Welcome to CampusRooms!', { id: loadingToast });
       
       // Auto-login after successful registration
       try {
-        const loginRes = await axios.post('http://localhost:3000/cr/reg/login', { 
+        const loginRes = await axios.post(`${API_BASE_URL}/cr/reg/login`, { 
           email, 
           password 
         });

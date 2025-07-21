@@ -3,6 +3,7 @@ import axios from 'axios';
 import LandingHeader from '../components/LandingHeader';
 import ListingCard from '../../components/ListingCard';
 import BackButton from '../../components/BackButton';
+import API_BASE_URL from '../../config/api';
 
 const MyListings = () => {
   const [listings, setListings] = useState([]);
@@ -15,7 +16,7 @@ const MyListings = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:3000/api/listings/my', {
+      const res = await axios.get(`${API_BASE_URL}/api/listings/my`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setListings(res.data);
@@ -39,7 +40,7 @@ const MyListings = () => {
     setModalLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3000/api/listings/${modalListingId}`, {
+      await axios.delete(`${API_BASE_URL}/api/listings/${modalListingId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setListings(listings => listings.filter(l => l._id !== modalListingId));

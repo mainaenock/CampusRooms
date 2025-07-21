@@ -7,6 +7,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import LandingHeader from '../components/LandingHeader';
 import MapPicker from './MapPicker';
+import API_BASE_URL from '../../config/api';
 
 const amenitiesList = ['Water', 'Electricity', 'WiFi', 'Parking', 'CCTV', 'Furnished'];
 
@@ -107,7 +108,7 @@ const NewListing = () => {
     // Fetch payment requirement status
     const fetchPaymentRequirement = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/api/settings/payment-requirement');
+        const res = await axios.get(`${API_BASE_URL}/api/settings/payment-requirement`);
         setRequirePayment(res.data.requirePaymentForListing);
       } catch {
         setRequirePayment(true); // Default to true if error
@@ -158,7 +159,7 @@ const NewListing = () => {
           }
         });
         images.forEach(img => formData.append('images', img));
-        await axios.post('http://localhost:3000/api/listings', formData, {
+        await axios.post(`${API_BASE_URL}/api/listings`, formData, {
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
         });
         toast.success('Listing created and published!');
@@ -190,7 +191,7 @@ const NewListing = () => {
         }
       });
       pendingFormData.images.forEach(img => formData.append('images', img));
-      await axios.post('http://localhost:3000/api/listings', formData, {
+      await axios.post(`${API_BASE_URL}/api/listings`, formData, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
       });
       toast.success('Listing created and published!');

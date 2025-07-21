@@ -5,6 +5,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import Header from './components/header';
 import BackButton from '../components/BackButton';
+import API_BASE_URL from '../config/api';
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
@@ -17,7 +18,7 @@ const ResetPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`http://localhost:3000/cr/reg/reset-password/${token}`, { password });
+      const res = await axios.post(`${API_BASE_URL}/cr/reg/reset-password/${token}`, { password });
 
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));

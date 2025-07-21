@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import API_BASE_URL from '../../config/api';
 
 const SOCKET_URL = 'http://localhost:3000';
 
@@ -34,7 +35,7 @@ const ChatRoom = ({ listingId, userId, receiverId, userName, receiverName, onClo
       }
       setLoading(true);
       try {
-        const res = await axios.get('http://localhost:3000/api/chat/history', {
+        const res = await axios.get(`${API_BASE_URL}/api/chat/history`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
           params: {
             listingId,

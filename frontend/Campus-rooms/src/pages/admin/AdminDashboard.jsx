@@ -7,6 +7,7 @@ import BackButton from '../../components/BackButton';
 import CacheManager from '../../components/CacheManager';
 import { useNavigate } from 'react-router-dom';
 import Switch from '@mui/material/Switch';
+import API_BASE_URL from '../../config/api';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -30,13 +31,13 @@ const AdminDashboard = () => {
   const refreshFlaggedListings = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/api/admin/flagged-listings', {
+      const response = await axios.get(`${API_BASE_URL}/api/admin/flagged-listings`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFlaggedListings(response.data);
       
       // Also refresh stats
-      const statsResponse = await axios.get('http://localhost:3000/api/admin/stats', {
+      const statsResponse = await axios.get(`${API_BASE_URL}/api/admin/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStats(statsResponse.data);
@@ -50,11 +51,11 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         const [statsRes, listingsRes, featuredRes, usersRes, flaggedRes] = await Promise.all([
-          axios.get('http://localhost:3000/api/admin/stats', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('http://localhost:3000/api/admin/recent-listings', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('http://localhost:3000/api/admin/featured-listings', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('http://localhost:3000/api/admin/recent-users', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('http://localhost:3000/api/admin/flagged-listings', { headers: { Authorization: `Bearer ${token}` } })
+          axios.get(`${API_BASE_URL}/api/admin/stats`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${API_BASE_URL}/api/admin/recent-listings`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${API_BASE_URL}/api/admin/featured-listings`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${API_BASE_URL}/api/admin/recent-users`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${API_BASE_URL}/api/admin/flagged-listings`, { headers: { Authorization: `Bearer ${token}` } })
         ]);
         setStats(statsRes.data);
         setRecentListings(listingsRes.data);
@@ -81,7 +82,7 @@ const AdminDashboard = () => {
       allUsers.length === 0
     ) {
       const token = localStorage.getItem('token');
-      axios.get('http://localhost:3000/api/admin/all-users', { headers: { Authorization: `Bearer ${token}` } })
+      axios.get(`${API_BASE_URL}/api/admin/all-users`, { headers: { Authorization: `Bearer ${token}` } })
         .then(res => setAllUsers(res.data))
         .catch(() => setAllUsers([]));
     }
@@ -92,7 +93,7 @@ const AdminDashboard = () => {
     const fetchPaymentRequirement = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get('http://localhost:3000/api/admin/payment-requirement', {
+        const res = await axios.get(`${API_BASE_URL}/api/admin/payment-requirement`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setRequirePayment(res.data.requirePaymentForListing);
@@ -106,7 +107,7 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem('token');
       const newValue = !requirePayment;
-      await axios.post('http://localhost:3000/api/admin/payment-requirement', { requirePaymentForListing: newValue }, {
+      await axios.post(`${API_BASE_URL}/api/admin/payment-requirement`, { requirePaymentForListing: newValue }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRequirePayment(newValue);
@@ -131,7 +132,7 @@ const AdminDashboard = () => {
       
       if (listingToDelete.id === 'all') {
         // Delete all flagged listings using bulk endpoint
-        const response = await axios.delete(`http://localhost:3000/api/admin/flagged-listings/all`, {
+        const response = await axios.delete(`${API_BASE_URL}/api/admin/flagged-listings/all`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -148,7 +149,7 @@ const AdminDashboard = () => {
         alert(response.data.message);
       } else {
         // Delete single listing
-        await axios.delete(`http://localhost:3000/api/admin/flagged-listing/${listingToDelete.id}`, {
+        await axios.delete(`${API_BASE_URL}/api/admin/flagged-listing/${listingToDelete.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -299,7 +300,7 @@ const AdminDashboard = () => {
                         onClick={async () => {
                           const token = localStorage.getItem('token');
                           try {
-                            const response = await axios.patch(`http://localhost:3000/api/admin/toggle-featured/${l._id}`, {}, { 
+                            const response = await axios.patch(`${API_BASE_URL}/api/admin/toggle-featured/${l._id}`, {}, { 
                               headers: { Authorization: `Bearer ${token}` } 
                             });
                             setRecentListings(listings => listings.map(item => 
@@ -407,7 +408,7 @@ const AdminDashboard = () => {
                     onClick={async () => {
                       const token = localStorage.getItem('token');
                       try {
-                        const response = await axios.post(`http://localhost:3000/api/admin/whatsapp-notify-all`, {}, {
+                        const response = await axios.post(`${API_BASE_URL}/api/admin/whatsapp-notify-all`, {}, {
                           headers: { Authorization: `Bearer ${token}` }
                         });
                         const notificationList = response.data.notifications.map(n => 
@@ -473,7 +474,7 @@ const AdminDashboard = () => {
                           onClick={async () => {
                             const token = localStorage.getItem('token');
                             try {
-                              const response = await axios.post(`http://localhost:3000/api/admin/whatsapp-notify/${l._id}`, {}, {
+                              const response = await axios.post(`${API_BASE_URL}/api/admin/whatsapp-notify/${l._id}`, {}, {
                                 headers: { Authorization: `Bearer ${token}` }
                               });
                               window.open(response.data.whatsappUrl, '_blank');
@@ -527,7 +528,7 @@ const AdminDashboard = () => {
                         onClick={async () => {
                           const token = localStorage.getItem('token');
                           try {
-                            const response = await axios.patch(`http://localhost:3000/api/admin/toggle-featured/${l._id}`, {}, { 
+                            const response = await axios.patch(`${API_BASE_URL}/api/admin/toggle-featured/${l._id}`, {}, { 
                               headers: { Authorization: `Bearer ${token}` } 
                             });
                             setFeaturedListings(listings => listings.filter(item => item._id !== l._id));

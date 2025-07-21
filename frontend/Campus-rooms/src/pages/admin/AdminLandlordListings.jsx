@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import ListingCard from '../../components/ListingCard';
+import API_BASE_URL from '../../config/api';
 
 const AdminLandlordListings = () => {
   const { landlordId } = useParams();
@@ -15,7 +16,7 @@ const AdminLandlordListings = () => {
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`http://localhost:3000/api/admin/landlord-listings/${landlordId}`, {
+        const res = await axios.get(`${API_BASE_URL}/api/admin/landlord-listings/${landlordId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setListings(res.data);

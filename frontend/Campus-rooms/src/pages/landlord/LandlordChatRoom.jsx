@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../../config/api';
 
 const SOCKET_URL = 'http://localhost:3000';
 
@@ -29,7 +30,7 @@ const LandlordChatRoom = ({ landlordId }) => {
     setLoadingConvs(true);
     async function fetchConversations() {
       try {
-        const res = await axios.get('http://localhost:3000/api/chat/user-conversations', {
+        const res = await axios.get(`${API_BASE_URL}/api/chat/user-conversations`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setConversations(res.data);
@@ -50,7 +51,7 @@ const LandlordChatRoom = ({ landlordId }) => {
     setLoadingMsgs(true);
     async function fetchMessages() {
       try {
-        const res = await axios.get('http://localhost:3000/api/chat/history', {
+        const res = await axios.get(`${API_BASE_URL}/api/chat/history`, {
           headers: { Authorization: `Bearer ${token}` },
           params: {
             listingId: activeStudent.listingId,
@@ -110,7 +111,7 @@ const LandlordChatRoom = ({ landlordId }) => {
   const handleDeleteConversation = async (listingId, otherUserId) => {
     if (!window.confirm('Are you sure you want to delete this chat?')) return;
     try {
-      await axios.delete('http://localhost:3000/api/chat/delete-conversation', {
+      await axios.delete(`${API_BASE_URL}/api/chat/delete-conversation`, {
         headers: { Authorization: `Bearer ${token}` },
         data: { listingId, otherUserId }
       });

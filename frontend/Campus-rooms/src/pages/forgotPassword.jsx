@@ -3,6 +3,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import Header from './components/header';
 import BackButton from '../components/BackButton';
+import API_BASE_URL from '../config/api';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -31,7 +32,7 @@ const ForgotPassword = () => {
     if (cooldown > 0) return;
 
     try {
-        await axios.post('http://localhost:3000/cr/reg/forgot-password', { email });
+        await axios.post(`${API_BASE_URL}/cr/reg/forgot-password`, { email });
       toast.success('Reset link sent to your email');
       setCooldown(30); // Start cooldown after success
     } catch (err) {

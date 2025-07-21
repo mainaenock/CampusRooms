@@ -3,6 +3,7 @@ import axios from 'axios';
 import ListingCard from '../components/ListingCard';
 import Header from './components/header';
 import BackButton from '../components/BackButton';
+import API_BASE_URL from '../config/api';
 
 const universities = [
   'University of Nairobi',
@@ -33,7 +34,7 @@ const Listings = () => {
       if (filters.minRent) params.minRent = filters.minRent;
       if (filters.maxRent) params.maxRent = filters.maxRent;
       if (filters.amenities.length) params.amenities = filters.amenities.join(',');
-      const res = await axios.get('http://localhost:3000/api/listings', { params });
+      const res = await axios.get(`${API_BASE_URL}/api/listings`, { params });
       setListings(res.data);
     } catch (err) {
       setListings([]);
