@@ -1,3 +1,5 @@
+import API_BASE_URL from '../config/api';
+
 class SmartCache {
   constructor() {
     this.cache = new Map();
@@ -198,7 +200,7 @@ class SmartCache {
   // Preload listings
   async preloadListings() {
     try {
-      const response = await fetch('http://localhost:3000/api/listings');
+      const response = await fetch(`${API_BASE_URL}/api/listings`);
       if (response.ok) {
         const listings = await response.json();
         this.set('listings', listings, 10 * 60 * 1000); // 10 minutes TTL
@@ -232,7 +234,7 @@ class SmartCache {
   //     const user = JSON.parse(localStorage.getItem('user') || '{}');
   //     if (user._id) {
   //       const token = localStorage.getItem('token');
-  //       const response = await fetch(`http://localhost:3000/api/user/preferences`, {
+  //       const response = await fetch(`${API_BASE_URL}/api/user/preferences`, {
   //         headers: { Authorization: `Bearer ${token}` }
   //       });
         
@@ -251,7 +253,7 @@ class SmartCache {
     const key = 'listings';
     const fetchFunction = async () => {
       const params = new URLSearchParams(filters);
-      const response = await fetch(`http://localhost:3000/api/listings?${params}`);
+      const response = await fetch(`${API_BASE_URL}/api/listings?${params}`);
       if (!response.ok) throw new Error('Failed to fetch listings');
       return response.json();
     };
@@ -264,7 +266,7 @@ class SmartCache {
     const key = 'userData';
     const fetchFunction = async () => {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/user/${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!response.ok) throw new Error('Failed to fetch user data');

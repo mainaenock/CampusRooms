@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../config/api';
 
-const SOCKET_URL = 'http://localhost:3000';
+const SOCKET_URL = API_BASE_URL;
 
 const NotificationBell = ({ userId }) => {
   const [unread, setUnread] = useState(0);

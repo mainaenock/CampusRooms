@@ -1,3 +1,5 @@
+import API_BASE_URL from '../config/api';
+
 class PerformanceMonitor {
   constructor() {
     this.metrics = {
@@ -291,7 +293,7 @@ class PerformanceMonitor {
     const batch = this.eventQueue.splice(0, this.BATCH_SIZE);
     try {
       const token = localStorage.getItem('token');
-      await fetch('http://localhost:3000/api/analytics/metrics', {
+      await fetch(`${API_BASE_URL}/api/analytics/metrics`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -330,7 +332,7 @@ class PerformanceMonitor {
   async sendToServer(type, data) {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/analytics/metrics', {
+      const response = await fetch(`${API_BASE_URL}/api/analytics/metrics`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

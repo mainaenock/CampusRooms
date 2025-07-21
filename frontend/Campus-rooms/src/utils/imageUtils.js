@@ -8,7 +8,7 @@ export const getImageUrl = (imageId) => {
   }
   
   // For GridFS images (ObjectIds), use the new API endpoint
-  return `http://localhost:3000/api/listings/image/${imageId}`;
+  return `${API_BASE_URL}/api/listings/image/${imageId}`;
 };
 
 // Utility function to get multiple image URLs
