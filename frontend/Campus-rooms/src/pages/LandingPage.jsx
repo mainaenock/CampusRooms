@@ -5,7 +5,8 @@ import axios from 'axios';
 import LandingHeader from './components/LandingHeader';
 import { Link } from 'react-router-dom';
 import ListingCardLanding from '../components/ListingCardLanding';
-import API_BASE_URL from '../config/api';
+// Hard code the Render API base URL for this page
+const RENDER_API_BASE_URL = 'https://campusrooms-3.onrender.com'; // <-- Replace with your actual Render backend URL
 
 const universities = [
   'University of Nairobi',
@@ -37,7 +38,7 @@ const LandingPage = () => {
     if (filters.amenities.length) params.amenities = filters.amenities.join(',');
     
     // Fetch all listings
-    axios.get(`${API_BASE_URL}/api/listings`, { params })
+    axios.get(`${RENDER_API_BASE_URL}/api/listings`, { params })
       .then(res => {
         const listings = res.data;
         setAllListings(listings);

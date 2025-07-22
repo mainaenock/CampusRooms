@@ -1,3 +1,4 @@
+import API_BASE_URL from '../config/api';
 // Utility function to get the correct image URL for GridFS images
 export const getImageUrl = (imageId) => {
   if (!imageId) return null;
