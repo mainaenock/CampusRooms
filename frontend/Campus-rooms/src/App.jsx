@@ -53,7 +53,7 @@ const App = () => {
         });
     }
 
-    // Track app initialization
+    // Track app initiagization
     performanceMonitor.trackEvent('app_loaded', {
       userAgent: navigator.userAgent,
       online: navigator.onLine,
